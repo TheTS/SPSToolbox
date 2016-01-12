@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SPS Path Generator:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SPS_Path_Generator_jar</output-path>
+    <root id="archive" name="SPS Path Generator.jar">
+      <element id="module-output" name="SPS Path Generator" />
+    </root>
+  </artifact>
+</component>
