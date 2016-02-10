@@ -5,38 +5,18 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- *
- * @author Int
- */
-public class TipsFrame extends JFrame {
-
-    private JButton jButton1;
-    private JEditorPane jEditorPane1;
-    private JScrollPane jScrollPane1;
+public class TipsFrame extends JFrame implements ActionListener {
 
     public TipsFrame() {
-
-        initComponents();
-    }
-
-    private void initComponents() {
-
-        jButton1 = new JButton();
-        jScrollPane1 = new JScrollPane();
-        jEditorPane1 = new JEditorPane();
+        JButton jButton1 = new JButton();
+        JEditorPane jEditorPane1 = new JEditorPane();
+        JScrollPane jScrollPane1  = new JScrollPane();
+        jButton1.setText("Close");
+        jButton1.addActionListener(this);
 
         setAlwaysOnTop(true);
-        setMaximumSize(new Dimension(214, 300));
-        setMinimumSize(new Dimension(214, 300));
-
-        jButton1.setText("Close");
-        jButton1.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
+        setMaximumSize(new Dimension(215, 300));
+        setMinimumSize(new Dimension(215, 300));
 
         jEditorPane1.setContentType("text/html");
         jEditorPane1.setEditable(false);
@@ -60,34 +40,14 @@ public class TipsFrame extends JFrame {
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1))
         );
-
         pack();
     }
 
-    private void jButton1ActionPerformed(ActionEvent evt) {
-        this.setVisible(false);
-    }
-
-    public static void main(String args[]) {
-
-        try {
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (Exception ex) {
-
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("Close")) {
+            this.setVisible(false);
         }
-            EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                new TipsFrame().setVisible(true);
-            }
-        });
     }
-
-
 
 }

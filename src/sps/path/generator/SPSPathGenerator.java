@@ -6,61 +6,64 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 
-/**
- *
- * @author int
- */
-public class SPSPathGenerator extends JFrame implements ActionListener,ComponentListener,WindowListener{
+public class SPSPathGenerator extends JFrame implements ActionListener {
 
-    private static File imageFile = new File("c:/simba/includes/sps/img/runescape_surface/air_altar_path.png");
+    private static boolean IsPathActive = true;
     private RSMapView mapView;
     private SidePane sidePane;
-    protected SettingsFrame settingsFrame = new SettingsFrame();
-    protected JFileChooser dialog = new JFileChooser(settingsFrame.getLastLoadedFile());
     private TipsFrame tipsFrame = new TipsFrame();
+    private CodeFrame codeFrame = new CodeFrame();
+    private SettingsFrame settingsFrame = new SettingsFrame();
+    private JFileChooser dialog = new JFileChooser(settingsFrame.getLastLoadedFile());
     private JPanel statusBar = new JPanel();
-    private JLabel MapCoordLabel = new JLabel("Shift (0,0)");
-    private JLabel mouseLabel = new JLabel("Mouse (0,0)");
+    private JLabel MapCoordLabel = new JLabel();
+    private JLabel mouseLabel = new JLabel();
+    private static File imageFile;
 
-    // main method
-    public static void main(String[] args) throws MalformedURLException {
+    public static void main(String[] args) throws IOException {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Failed to set Look and Feel: "
-                            + ex.getLocalizedMessage() , "Look and Feel Error",
-                    JOptionPane.INFORMATION_MESSAGE);
-            Logger.getLogger(SPSPathGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        new SPSPathGenerator("SPS Path Generator");
-
+        new SPSPathGenerator();
     }
 
-    //SPSPathGenerator Constructor
-    public SPSPathGenerator(String title) throws HeadlessException {
-        super(title);
-        this.setLayout(new GridBagLayout());
+    public SPSPathGenerator() throws HeadlessException, IOException {
+        super("SPS Toolbox");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        dialog.setFileFilter(new FileNameExtensionFilter("Image Files", "png","bmp","jpg","jpeg","gif"));
-       
-        mapView = new RSMapView() {
+
+        if (settingsFrame.getLastLoadedFile() == null) {
+            imageFile = new File("c:/simba/includes/sps/img/runescape_surface/air_altar_path.png");
+        } else {
+            imageFile = settingsFrame.getLastLoadedFile();
+        }
+
+        mapView = new RSMapView() { //Override RSMapView to call methods through SidePane instance
 
             @Override
             public void clickedPoint(Point p, int button) {
                 if (button == MouseEvent.BUTTON1){
-                    addTablePoint(p);
+                    sidePane.addTablePoint(p);
                 }
             }
 
             @Override
-            public Point[] getPoints() {
-                return getTablePoints();
+            public void deleteSelectedPoint(){
+                sidePane.getPointTable().deleteSelectedPoints();
             }
+
+            @Override
+            public Point[] getPoints() {
+                return sidePane.getPoints();
+            }
+
+            @Override
+            public boolean isPathActive() {return getIsPathActive(); }
 
             @Override
             public boolean isRepositioning() {
@@ -78,65 +81,64 @@ public class SPSPathGenerator extends JFrame implements ActionListener,Component
             }
 
             @Override
-            public int getMaxLineLength() {
-                return settingsFrame.getMaxLineLength();
-            }
-
-            @Override
-            public int getFogOpacity() {
-                return settingsFrame.getFogOpacity();
-            }
-
-            @Override
-            public Color getLineCol() {
-                return settingsFrame.getLineCol();
-            }
-
-            @Override
-            public Color getWarnLineCol() {
-                return settingsFrame.getWarnLineCol();
-            }
-
-            @Override
-            public Color getPointCol() {
-                return settingsFrame.getPointCol();
-            }
-
-            @Override
-            public Color getSelPointCol() {
-                return settingsFrame.getSelPointCol();
-            }
-
-            @Override
             public int[] getSelectedPointIndexs() {
                 return sidePane.getPointTable().getSelectedRows();
             }
 
             @Override
-            public void setMapCoordLabelVal(int x, int y){
+            public int getMaxLineLength() {
+                return settingsFrame.getMaxLineLength();
+            }
+
+
+            @Override
+            public Color getLineColor() {
+                return settingsFrame.getLineColor();
+            }
+
+            @Override
+            public Color getWarnLineColor() {
+                return settingsFrame.getWarnLineColor();
+            }
+
+            @Override
+            public boolean getGameMode() {
+                return settingsFrame.getGameMode();
+            }
+
+            @Override
+            public boolean getSafePolygon() {
+                return settingsFrame.getSafePolygon();
+            }
+
+            @Override
+            public void setMapCoordLabelVal(int x, int y) {
                 MapCoordLabel.setText("Current Map Coordinates (" + x + "," + y + ")");
             }
 
             @Override
-            public void setMouseLabelVal(int x, int y){
-                mouseLabel.setText("Mouse Coordinates (" + x + "," + y + ")");
+            public void setMouseLabelVal(Point p) {
+                mouseLabel.setText("Mouse Coordinates (" + p.x + "," + p.y + ")");
             }
         };
-        mapView.loadMapImage(imageFile.getAbsolutePath());
 
-        //Path menu
-        JMenu menuPath = new JMenu("Path");
-        menuPath.add("Save Path").addActionListener(this);
-        menuPath.add("Load Path").addActionListener(this);
-        menuPath.addSeparator();
-        menuPath.add("Invert Path").addActionListener(this);
-        menuPath.add("Clear Path").addActionListener(this);
+        mapView.loadMapImage(imageFile.getAbsolutePath());
+        dialog.setFileFilter(new FileNameExtensionFilter("Image Files", "png","bmp","jpg","jpeg","gif"));
 
         //Map menu
-        JMenu menuImage = new JMenu("Map");
-        menuImage.add("Reload map").addActionListener(this);
-        menuImage.add("Load different map").addActionListener(this);
-        menuImage.add("Repaint map").addActionListener(this);
+        JMenu menuMap = new JMenu("Map");
+        menuMap.add("Reload Map").addActionListener(this);
+        menuMap.add("Load New Map").addActionListener(this);
+        menuMap.addSeparator();
+        menuMap.add("Repaint Map").addActionListener(this);
+
+        //Points menu
+        JMenu menuPath = new JMenu("Points");
+        menuPath.add("Save Points").addActionListener(this);
+        menuPath.add("Load Points").addActionListener(this);
+        menuPath.addSeparator();
+        menuPath.add("Invert Points").addActionListener(this);
+        menuPath.add("Clear Points").addActionListener(this);
 
         //Tools menu
         JMenu menuTools = new JMenu("Tools");
@@ -147,96 +149,126 @@ public class SPSPathGenerator extends JFrame implements ActionListener,Component
         menuHelp.add("How to use this").addActionListener(this);
 
         //Buttons
-        JButton pathBtn = new JButton("Copy Path Array");
+        JButton codeBtn = new JButton("Make Code Snippet");
+        JButton copyBtn = new JButton("Copy To Clipboard");
+        JRadioButton pathBtn = new JRadioButton("Path");
+        JRadioButton areaBtn = new JRadioButton("Area");
+        codeBtn.addActionListener(this);
+        copyBtn.addActionListener(this);
         pathBtn.addActionListener(this);
+        areaBtn.addActionListener(this);
+
+        ButtonGroup radioBtns = new ButtonGroup();
+        radioBtns.add(pathBtn);
+        radioBtns.add(areaBtn);
+        pathBtn.setSelected(true);
 
         JMenuBar menuBar = new JMenuBar();
-        menuBar.add(menuImage);
+        menuBar.add(menuMap);
         menuBar.add(menuPath);
         menuBar.add(menuTools);
         menuBar.add(menuHelp);
+        menuBar.add(codeBtn);
+        menuBar.add(copyBtn);
+        menuBar.add(new JSeparator(JSeparator.VERTICAL));
         menuBar.add(pathBtn);
+        menuBar.add(areaBtn);
 
         //Status bar is at the bottom on the JFrame
         statusBar.setLayout(new BoxLayout(statusBar, BoxLayout.X_AXIS));
         statusBar.setMaximumSize(new Dimension(20000,25));
         statusBar.setPreferredSize(new Dimension(600,25));
         statusBar.add(MapCoordLabel);
+        JLabel placeholder = new JLabel(" | ");
+        statusBar.add(placeholder);
         statusBar.add(mouseLabel);
-        
+
         sidePane = new SidePane(mapView);
-        this.add(mapView,new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-        this.add(sidePane,new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.NORTHEAST, GridBagConstraints.VERTICAL, new Insets(0,0,0,0), 0, 0));
-        this.add(statusBar, new GridBagConstraints(0, 1, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
-        this.setJMenuBar(menuBar);
-        this.addComponentListener(this);
-        this.addWindowListener(this);
 
-        this.setSize(600, 400);
-        this.setVisible(true);
+        setLayout(new GridBagLayout());
+        setMinimumSize(new Dimension(550, 400));
+        add(mapView,new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+        add(sidePane,new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.NORTHEAST, GridBagConstraints.VERTICAL, new Insets(0,0,0,0), 0, 0));
+        add(statusBar, new GridBagConstraints(0, 1, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
+        setJMenuBar(menuBar);
+
+        getContentPane().setBackground(Color.white);
+        setVisible(true);
     }
 
-    private void addTablePoint(Point p) {
-
-        sidePane.addTablePoint(p);
-    }
-    
-    private Point[] getTablePoints(){
-
-        return sidePane.getPoints();
-    }
-
-    // Action Listener
     @Override
     public void actionPerformed(ActionEvent e) {
 
         switch (e.getActionCommand()){
-            case "Reload map":
+            case "Reload Map":
                 mapView.reloadMapImage();
                 break;
-            case "Load different map":
+            case "Load New Map":
                 dialog.setMultiSelectionEnabled(false);
                 dialog.showDialog(this, "Choose");
                 if (dialog.getSelectedFile() == null)
                     return;
-                settingsFrame.setLastLoadedFile(dialog.getCurrentDirectory());
+                imageFile = dialog.getSelectedFile();
+                settingsFrame.setLastLoadedFile(dialog.getSelectedFile().getAbsoluteFile());
+                settingsFrame.onClose();
                 mapView.loadMapImage(dialog.getSelectedFile().getAbsolutePath());
                 break;
-            case "Repaint":
+            case "Repaint Map":
                 mapView.repaint();
                 break;
-            case "Copy Path Array":
-                CopyPathToClip();
+            case "Save Points":
+                sidePane.getPointTable().savePath();
+                break;
+            case "Load Points":
+                sidePane.getPointTable().openPath();
+                mapView.repaint();
+                break;
+            case "Invert Points":
+                sidePane.getPointTable().setPointArr(reverse(sidePane.getPointTable().getPointArr()));
+                break;
+            case "Clear Points":
+                if (JOptionPane.showConfirmDialog(this , "This will remove all the points from your " + (getIsPathActive() ? "path" : "area"), "Are you sure?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+                    sidePane.getPointTable().setPointArr(new Point[0]);
                 break;
             case "Settings":
                 settingsFrame.setVisible(true);
                 break;
-            case "Invert Path":
-                sidePane.getPointTable().setPointArr(flipArray(sidePane.getPointTable().getPointArr()));
-                break;
-            case "Save Path":
-                sidePane.getPointTable().savePath();
-                break;
-            case "Load Path":
-                sidePane.getPointTable().openPath();
-                mapView.repaint();
-                break;
-            case "Clear Path":
-                if (JOptionPane.showConfirmDialog(this , "This will remove all the points from your path. Are you sure?") == JOptionPane.YES_OPTION)
-                    sidePane.getPointTable().setPointArr(new Point[0]);
-                break;
             case "How to use this":
                 tipsFrame.setVisible(true);
                 break;
+            case "Make Code Snippet":
+                codeFrame.setPath(getPathDec(), getIsPathActive(), imageFile.getName(), imageFile.getAbsolutePath());
+                codeFrame.setVisible(true);
+                break;
+            case "Copy To Clipboard":
+                CopyPathToClip();
+                break;
+            case "Path":
+                if (!getIsPathActive() && sidePane.getPoints().length > 0)
+                    if (JOptionPane.showConfirmDialog(this , "This will remove all the points from your area", "Are you sure?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+                        sidePane.getPointTable().setPointArr(new Point[0]);
+                setIsPathActive(true);
+                break;
+            case "Area":
+                if (getIsPathActive() && sidePane.getPoints().length > 0)
+                    if (JOptionPane.showConfirmDialog(this , "This will remove all the points from your path", "Are you sure?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+                        sidePane.getPointTable().setPointArr(new Point[0]);
+                setIsPathActive(false);
+                break;
         }
+    }
 
+    public void setIsPathActive(boolean active){ IsPathActive = active; }
+
+    public boolean getIsPathActive(){
+        return IsPathActive;
     }
     
     public void CopyPathToClip(){
         StringSelection pathDec = new StringSelection(getPathDec());
         try {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(pathDec, pathDec);
-            JOptionPane.showMessageDialog(this, "Successfully copied path to clipboard","Successful", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Successfully copied " + (getIsPathActive() ? "path" : "area") + " to clipboard","Successful", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex){
             JOptionPane.showMessageDialog(this, "Failed to set clipboard contents.", "Error accessing clipboard", JOptionPane.ERROR_MESSAGE);
         }
@@ -245,61 +277,18 @@ public class SPSPathGenerator extends JFrame implements ActionListener,Component
     private String getPathDec() {
         StringBuilder sb = new StringBuilder("[");
 
-        Point[] points = getTablePoints();
+        Point[] points = sidePane.getPoints();
         for (int i = 0 ; i < points.length ; i++){
-            sb.append("Point(").append(points[i].x).append(", ").append(points[i].y).append(")");
-            if (i < points.length - 1 && points.length > 0){
+            sb.append("[").append(points[i].x).append(", ").append(points[i].y).append("]");
+            if (i < points.length - 1 && points.length > 0)
                 sb.append(", ");
-            }
+
         }
         return sb.append("]").toString();
     }
 
-    private <T> T[] flipArray(T[] theArr){
-        java.util.List<T> reversedList = new ArrayList<>();
-        for (T t : theArr){
-            reversedList.add(0, t);
-        }
-        return reversedList.toArray(theArr);
+    public static <T> T[] reverse(T[] array) {
+        Collections.reverse(Arrays.asList(array));
+        return array;
     }
-
-    @Override
-    public void componentResized(ComponentEvent e) {
-        mapView.setMiniMapView();
-        mapView.getMinimap().repaint();
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-
-        settingsFrame.onExit();
-    }
-
-    //Overrides that are unused
-    @Override
-    public void componentMoved(ComponentEvent e) {}
-
-    @Override
-    public void componentShown(ComponentEvent e) {}
-
-    @Override
-    public void componentHidden(ComponentEvent e) {}
-
-    @Override
-    public void windowOpened(WindowEvent e) {}
-
-    @Override
-    public void windowClosed(WindowEvent e) {}
-
-    @Override
-    public void windowIconified(WindowEvent e) {}
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {}
-
-    @Override
-    public void windowActivated(WindowEvent e) {}
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {}
 }
