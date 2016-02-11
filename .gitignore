@@ -1,0 +1,9 @@
+.idea/.name
+.idea/compiler.xml
+*.iml
+out/production/SPSToolbox/toolbox/TipsFrame.class
+*.class
+out/production/SPSToolbox/META-INF/MANIFEST.MF
+*.jar
+.idea/artifacts/SPSToolbox.xml
+*.xml
