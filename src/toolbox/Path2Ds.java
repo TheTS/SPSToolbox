@@ -1,15 +1,16 @@
-package sps.path.generator;
+package toolbox;
 
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.util.*;
+
 /*
     Checks if a Path2D is self-intersecting.
     @author Gilli Tzabari (http://stackoverflow.com/users/14731/gili)
 
  */
-public class Path2Ds {
+class Path2Ds {
 
     public static boolean isSelfIntersecting(PathIterator path) {
         SortedSet<Line2D> lines = getLines(path);
@@ -17,12 +18,12 @@ public class Path2Ds {
             return false;
 
         Set<Line2D> candidates = new HashSet<Line2D>();
-        for (Line2D line: lines) {
+        for (Line2D line : lines) {
             if (Double.compare(line.getP1().distance(line.getP2()), 0) <= 0) {
                 // Lines of length 0 do not cause self-intersection
                 continue;
             }
-            for (Iterator<Line2D> i = candidates.iterator(); i.hasNext();) {
+            for (Iterator<Line2D> i = candidates.iterator(); i.hasNext(); ) {
                 Line2D candidate = i.next();
 
                 // Logic borrowed from Line2D.intersectsLine()
@@ -44,7 +45,7 @@ public class Path2Ds {
                     // Lines may share a point, so long as they extend in different directions
                     if (lineRelativeToCandidate1 == 0 && lineRelativeToCandidate2 != 0) {
                         // candidate.P1 shares a point with line
-                        if (candidateRelativeToLine1 == 0 && candidateRelativeToLine2 != 0){
+                        if (candidateRelativeToLine1 == 0 && candidateRelativeToLine2 != 0) {
                             // line.P1 == candidate.P1
                             continue;
                         }
@@ -53,8 +54,7 @@ public class Path2Ds {
                             continue;
                         }
                         // else candidate.P1 intersects line
-                    }
-                    else if (lineRelativeToCandidate1 != 0 && lineRelativeToCandidate2 == 0) {
+                    } else if (lineRelativeToCandidate1 != 0 && lineRelativeToCandidate2 == 0) {
                         // candidate.P2 shares a point with line
                         if (candidateRelativeToLine1 == 0 && candidateRelativeToLine2 != 0) {
                             // line.P1 == candidate.P2
@@ -94,14 +94,14 @@ public class Path2Ds {
         if (path.isDone())
             return result;
         int type = path.currentSegment(coords);
-        assert (type == PathIterator.SEG_MOVETO): type;
+        assert (type == PathIterator.SEG_MOVETO) : type;
         Point.Double startPoint = new Point.Double(coords[0], coords[1]);
         Point.Double openPoint = startPoint;
         path.next();
 
         while (!path.isDone()) {
             type = path.currentSegment(coords);
-            assert (type != PathIterator.SEG_CUBICTO && type != PathIterator.SEG_QUADTO): type;
+            assert (type != PathIterator.SEG_CUBICTO && type != PathIterator.SEG_QUADTO) : type;
             switch (type) {
                 case PathIterator.SEG_MOVETO: {
                     openPoint = startPoint;

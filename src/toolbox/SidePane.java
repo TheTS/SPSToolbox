@@ -1,12 +1,12 @@
-package sps.path.generator;
+package toolbox;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class SidePane extends JPanel {
+class SidePane extends JPanel {
 
-    private PointTable pointTable;
-    private RSMapView map;
+    private final PointTable pointTable;
+    private final RSMapView map;
 
     public SidePane(RSMapView map) {
         this.map = map;

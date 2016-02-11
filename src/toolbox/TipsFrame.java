@@ -1,11 +1,11 @@
-package sps.path.generator;
+package toolbox;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class TipsFrame extends JFrame implements ActionListener {
+class TipsFrame extends JFrame implements ActionListener {
 
     public TipsFrame() {
         JButton jButton1 = new JButton();

@@ -1,7 +1,14 @@
-package sps.path.generator;
+package toolbox;
 
-import java.awt.Point;
-import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,21 +16,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
-import javax.swing.JTable;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
 public abstract class PointTable extends JTable implements ActionListener, MouseListener, ListSelectionListener {
 
+    private static final DefaultTableModel tm = new DefaultTableModel(new String[]{"#", "X", "Y"}, 0) {
+    };
+    private final JPopupMenu rightClickMenu = new JPopupMenu();
+    private final JFileChooser fileDialog = new JFileChooser();
     private boolean repositioning;
     private int repositionIndex;
-    private JPopupMenu rightClickMenu = new JPopupMenu();
-    private JFileChooser fileDialog = new JFileChooser();
-    private static DefaultTableModel tm = new DefaultTableModel(new String[]{"#", "X", "Y"}, 0) {};
 
     public PointTable() {
         super(tm);
@@ -32,6 +33,15 @@ public abstract class PointTable extends JTable implements ActionListener, Mouse
         rightClickMenu.add("Delete point").addActionListener(this);
         rightClickMenu.add("Focus view here").addActionListener(this);
         rightClickMenu.add("Reposition point").addActionListener(this);
+    }
+
+    public Point[] getPointArr() {
+        Point[] points = new Point[this.getRowCount()];
+
+        for (int i = 0; i < points.length; i++)
+            points[i] = new Point(Integer.parseInt(String.valueOf(tm.getValueAt(i, 1))), Integer.parseInt(String.valueOf(tm.getValueAt(i, 2))));
+
+        return points;
     }
 
     public void setPointArr(Point[] points) {
@@ -44,15 +54,6 @@ public abstract class PointTable extends JTable implements ActionListener, Mouse
             tm.setValueAt(String.valueOf(points[i].x), i, 1);
             tm.setValueAt(String.valueOf(points[i].y), i, 2);
         }
-    }
-
-    public Point[] getPointArr() {
-        Point[] points = new Point[this.getRowCount()];
-
-        for (int i = 0; i < points.length; i++)
-            points[i] = new Point(Integer.parseInt(String.valueOf(tm.getValueAt(i, 1))), Integer.parseInt(String.valueOf(tm.getValueAt(i, 2))));
-
-        return points;
     }
 
     public void addPoint(Point p) {
@@ -68,14 +69,14 @@ public abstract class PointTable extends JTable implements ActionListener, Mouse
         this.revalidate();
     }
 
-    public void moveRow(int from, int to) {
+    private void moveRow(int from, int to) {
         Object[] tempRow = {this.getValueAt(from, 0), this.getValueAt(from, 1), this.getValueAt(from, 2)};
         tm.removeRow(from);
         tm.insertRow(to, tempRow);
         renumberTable();
     }
 
-    public void renumberTable() {
+    private void renumberTable() {
         for (int i = 0; i < tm.getRowCount(); i++)
             tm.setValueAt(i, i, 0);
     }
@@ -95,7 +96,7 @@ public abstract class PointTable extends JTable implements ActionListener, Mouse
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        switch (e.getActionCommand()){
+        switch (e.getActionCommand()) {
             case "Change point index":
                 String i = JOptionPane.showInputDialog(this, "Enter a new indice for this point.", "Change point indice", JOptionPane.QUESTION_MESSAGE);
                 try {
@@ -135,7 +136,7 @@ public abstract class PointTable extends JTable implements ActionListener, Mouse
         return repositioning;
     }
 
-    public void setRepositioning(boolean repositioning) {
+    private void setRepositioning(boolean repositioning) {
         this.repositioning = repositioning;
     }
 
@@ -143,7 +144,7 @@ public abstract class PointTable extends JTable implements ActionListener, Mouse
         return repositionIndex;
     }
 
-    public void setRepositionIndex(int repositionIndex) {
+    private void setRepositionIndex(int repositionIndex) {
         this.repositionIndex = repositionIndex;
     }
 
@@ -215,7 +216,7 @@ public abstract class PointTable extends JTable implements ActionListener, Mouse
 
 
             if (tm.getRowCount() > 0 && firstSelection == tm.getRowCount()) {
-                this.setRowSelectionInterval(tm.getRowCount()-1, tm.getRowCount()-1);
+                this.setRowSelectionInterval(tm.getRowCount() - 1, tm.getRowCount() - 1);
             } else if (tm.getRowCount() > 0 && firstSelection >= 0) {
                 this.setRowSelectionInterval(Math.max(0, Math.min(firstSelection, tm.getRowCount() - 1)), Math.max(0, Math.min(firstSelection, tm.getRowCount() - 1)));
             }

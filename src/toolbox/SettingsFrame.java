@@ -1,5 +1,8 @@
-package sps.path.generator;
+package toolbox;
 
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -7,23 +10,21 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-public class SettingsFrame extends JFrame implements ActionListener, ChangeListener, ItemListener {
+class SettingsFrame extends JFrame implements ActionListener, ChangeListener, ItemListener {
 
-    private Properties properties = new Properties();
-    private File propertiesFile =  new File(System.getProperty("user.home") + "/.SPSToolBox/","SPSToolBox.properties");
+    private final Properties properties = new Properties();
+    private final File propertiesFile = new File(System.getProperty("user.home") + "/.SPSToolBox/", "SPSToolBox.properties");
+    private final JButton bLineColor = new JButton("Choose Color");
+    private final JButton bFillColor = new JButton("Choose Color");
     private boolean safePolygon = true;
-    private boolean gameMode = false;
+    private boolean gameMode = true;
     private Color lineColor = Color.BLUE;
     private Color warnLineColor = Color.RED;
     private int maxLineLength = 65;
+    private final JTextField slideText = new JTextField(String.valueOf(maxLineLength), 3);
     private File lastLoadedFile = null;
-
-    JButton bLineColor = new JButton("Choose Color");
-    JTextField slideText = new JTextField(String.valueOf(maxLineLength), 3);
+    private Color fillColor = new Color(90, 200, 220, 80);
 
     // Constructor
     public SettingsFrame() {
@@ -38,7 +39,7 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
             }
         });
 
-        setPreferredSize(new Dimension(350, 200));
+        setPreferredSize(new Dimension(350, 250));
         setLocationRelativeTo(null);
 
         //Game Mode
@@ -48,7 +49,7 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
         ButtonGroup bgGameMode = new ButtonGroup();
         bOSR.addActionListener(this);
         bRS3.addActionListener(this);
-        bRS3.setSelected(true);
+        bOSR.setSelected(true);
         bgGameMode.add(bOSR);
         bgGameMode.add(bRS3);
 
@@ -65,6 +66,10 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
         JLabel warnLineColor = new JLabel("Warning Line Color");
         JButton bWarnLineColor = new JButton("Choose Color");
         bWarnLineColor.addActionListener(this);
+
+        //Fill color
+        JLabel fillColor = new JLabel("Area Fill Color");
+        bFillColor.addActionListener(this);
 
         //To enable that hackery polygon drawing
         JLabel safePolygon = new JLabel("Enable self-intersecting polygons");
@@ -112,21 +117,34 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
         c.gridx = 1;
         c.gridy = 3;
         add(bWarnLineColor, c);
+
         c.gridx = 0;
         c.gridy = 4;
+        add(fillColor, c);
+        c.gridwidth = 2;
+        c.gridx = 1;
+        c.gridy = 4;
+        add(bFillColor, c);
+
+        c.gridx = 0;
+        c.gridy = 5;
         add(safePolygon, c);
         c.gridx = 2;
-        c.gridy = 4;
+        c.gridy = 5;
         add(cSafePolygon, c);
 
         pack();
         loadSettings();
     }
 
+    public static void main(String args[]) {
+        new SettingsFrame().setVisible(true);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        switch (e.getActionCommand()){
+        switch (e.getActionCommand()) {
             case "OSR":
                 if (!getGameMode())
                     setGameMode(true);
@@ -136,8 +154,10 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
                     setGameMode(false);
                 break;
             case "Choose Color":
-                if (e.getSource() == bLineColor){
+                if (e.getSource() == bLineColor) {
                     setLineColor(pickColor());
+                } else if (e.getSource() == bFillColor) {
+                    setFillColor(pickColor());
                 } else {
                     setWarnLineColor(pickColor());
                 }
@@ -150,7 +170,7 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
 
     @Override
     public void stateChanged(ChangeEvent e) {
-        JSlider s = (JSlider)e.getSource();
+        JSlider s = (JSlider) e.getSource();
         setMaxLineLength(s.getValue());
         slideText.setText(String.valueOf(getMaxLineLength()));
     }
@@ -161,64 +181,73 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
     }
 
     // Setters and Getters
-    public int getMaxLineLength(){
+    public int getMaxLineLength() {
         return maxLineLength;
     }
 
-    public void setMaxLineLength(int value){
+    private void setMaxLineLength(int value) {
         maxLineLength = value;
         properties.setProperty("maxLineLength", "" + value);
     }
 
-    public boolean getSafePolygon(){
+    public boolean getSafePolygon() {
         return safePolygon;
     }
 
-    public void setSafePolygon(Boolean b){
+    private void setSafePolygon(Boolean b) {
         safePolygon = b;
-        properties.setProperty("safePolygon" , "" + b);
+        properties.setProperty("safePolygon", "" + b);
     }
 
-    public boolean getGameMode(){
+    public boolean getGameMode() {
         return gameMode;
     }
 
-    public void setGameMode(Boolean OSR){
+    private void setGameMode(Boolean OSR) {
         gameMode = OSR;
-        properties.setProperty("gameMode" , "" + OSR);
+        properties.setProperty("gameMode", "" + OSR);
     }
 
-    public Color getLineColor(){
+    public Color getLineColor() {
         return lineColor;
     }
 
-    public void setLineColor(Color col){
+    private void setLineColor(Color col) {
         lineColor = col;
-        properties.setProperty("lineColor" , "" + col.getRGB());
+        properties.setProperty("lineColor", "" + col.getRGB());
     }
 
-    public Color getWarnLineColor(){
+    public Color getWarnLineColor() {
         return warnLineColor;
     }
 
-    public void setWarnLineColor(Color col){
+    private void setWarnLineColor(Color col) {
         warnLineColor = col;
-        properties.setProperty("warnLineColor" , "" + col.getRGB());
+        properties.setProperty("warnLineColor", "" + col.getRGB());
     }
 
-    public void setLastLoadedFile(File newFile){
-        if (newFile == null)
-            return;
-        lastLoadedFile = newFile;
-        properties.setProperty("lastLoadedFile", lastLoadedFile.getAbsolutePath());
+    public Color getFillColor() {
+        return fillColor;
+    }
+
+    private void setFillColor(Color col) {
+        fillColor = col;
+        properties.setProperty("fillColor", "" + col.getRGB());
     }
 
     public File getLastLoadedFile() {
         return lastLoadedFile;
     }
 
+    public void setLastLoadedFile(File newFile) {
+        if (newFile == null)
+            return;
+        lastLoadedFile = newFile;
+        properties.setProperty("lastLoadedFile", lastLoadedFile.getAbsolutePath());
+    }
+
     private Color pickColor() {
-        return JColorChooser.showDialog(this, "Choose a new color" , Color.RED);
+        return JColorChooser.showDialog(this, "Choose a new color", Color.RED);
     }
 
     private void loadSettings() {
@@ -232,34 +261,40 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
             }
         } else {
             try {
-                properties.load(new FileInputStream(propertiesFile));
+                FileInputStream in = new FileInputStream(propertiesFile);
+                properties.load(in);
 
-                if (properties.contains("lastLoadedFile"))
+                if (properties.containsKey("lastLoadedFile"))
                     setLastLoadedFile(new File(properties.getProperty("lastLoadedFile")));
                 else
-                    setLastLoadedFile(lastLoadedFile);
+                    setLastLoadedFile(getLastLoadedFile());
 
-                if (properties.contains("gameMode"))
+                if (properties.containsKey("gameMode"))
                     setGameMode(Boolean.getBoolean(properties.getProperty("gameMode")));
                 else
                     setGameMode(getGameMode());
 
-                if (properties.contains("maxLineLength"))
-                    setMaxLineLength(Integer.getInteger(properties.getProperty("maxLineLength")));
+                if (properties.containsKey("maxLineLength"))
+                    setMaxLineLength(Integer.valueOf(properties.getProperty("maxLineLength")));
                 else
                     setMaxLineLength(getMaxLineLength());
 
-                if (properties.contains("lineColor"))
-                    setLineColor(new Color(Integer.getInteger(properties.getProperty("lineColor"))));
+                if (properties.containsKey("lineColor"))
+                    setLineColor(new Color(Integer.valueOf(properties.getProperty("lineColor")), true));
                 else
                     setLineColor(getLineColor());
 
-                if (properties.contains("warnLineColor"))
-                    setWarnLineColor(new Color(Integer.getInteger(properties.getProperty("warnLineColor"))));
+                if (properties.containsKey("warnLineColor"))
+                    setWarnLineColor(new Color(Integer.valueOf(properties.getProperty("warnLineColor")), true));
                 else
                     setWarnLineColor(getWarnLineColor());
 
-                if (properties.contains("safePolygon"))
+                if (properties.containsKey("fillColor"))
+                    setFillColor(new Color(Integer.valueOf(properties.getProperty("fillColor")), true));
+                else
+                    setFillColor(getFillColor());
+
+                if (properties.containsKey("safePolygon"))
                     setSafePolygon(Boolean.getBoolean(properties.getProperty("safePolygon")));
                 else
                     setSafePolygon(getSafePolygon());
@@ -275,8 +310,8 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
             try {
                 propertiesFile.createNewFile();
             } catch (IOException e) {
-            e.printStackTrace();
-        }
+                e.printStackTrace();
+            }
 
         try {
             FileOutputStream out = new FileOutputStream(propertiesFile);
@@ -284,10 +319,6 @@ public class SettingsFrame extends JFrame implements ActionListener, ChangeListe
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String args[]) {
-        new SettingsFrame().setVisible(true);
     }
 
 }

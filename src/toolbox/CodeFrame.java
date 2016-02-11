@@ -1,9 +1,9 @@
-package sps.path.generator;
+package toolbox;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class CodeFrame extends JFrame {
+class CodeFrame extends JFrame {
 
     private final JEditorPane editor = new JEditorPane();
 
@@ -18,17 +18,19 @@ public class CodeFrame extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(editor);
         add(scrollPane);
-        //setPath("[[108, 59], [100, 82], [88, 116], [88, 155], [114, 199], [140, 230], [192, 240], [245, 241], [277, 219], [306, 187], [338, 186], [359, 180], [358, 143], [358, 110], [348, 92], [272, 73], [261, 59], [262, 14]]", true, "", "");
     }
 
-    private String splitPath(String path){
-        if (path.length() > 70){
-            System.out.println(path);
+    public static void main(String args[]) {
+        new CodeFrame().setVisible(true);
+    }
+
+    private String splitPath(String path) {
+        if (path.length() > 70) {
             StringBuilder sb = new StringBuilder();
             int j = 65;
-            for (int i = 0; i < path.length()-1; i++) {
+            for (int i = 0; i < path.length() - 1; i++) {
                 if ((j % 65 == 0) && i >= j)
-                    if ((path.charAt(i) == '[') && (path.charAt(i-2) == ',') && (path.length() - i > 15)){
+                    if ((path.charAt(i) == '[') && (path.charAt(i - 2) == ',') && (path.length() - i > 15)) {
                         sb.append("\n           ");
                         j += 65;
                     }
@@ -40,12 +42,12 @@ public class CodeFrame extends JFrame {
         return path;
     }
 
-    public void setPath(String path, Boolean isPathActive, String mapName, String mapPath){
+    public void setPath(String path, Boolean isPathActive, String mapName, String mapPath) {
         path = splitPath(path);
         String folder;
-        if (mapPath.toLowerCase().contains("runescape_surface")){
+        if (mapPath.toLowerCase().contains("runescape_surface")) {
             folder = "RUNESCAPE_SURFACE";
-        } else if (mapPath.toLowerCase().contains("runescape_other")){
+        } else if (mapPath.toLowerCase().contains("runescape_other")) {
             folder = "RUNESCAPE_OTHER";
         } else {
             folder = "{Put your map in the SPS directory}";
@@ -61,7 +63,7 @@ public class CodeFrame extends JFrame {
                             "var\n" +
                             "  path: TPointArray;\n" +
                             "begin\n" +
-                            "  path := " + path  + ";\n\n" +
+                            "  path := " + path + ";\n\n" +
                             "  if not sps.walkPath(path) then\n" +
                             "    sps.blindWalk(path[high(path)]);\n" +
                             "end;\n\n" +
@@ -89,8 +91,5 @@ public class CodeFrame extends JFrame {
                             "  until false;\n" +
                             "end.");
         }
-    }
-    public static void main(String args[]) {
-        new CodeFrame().setVisible(true);
     }
 }
