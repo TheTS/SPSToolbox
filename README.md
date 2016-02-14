@@ -4,6 +4,13 @@ The **_SPSToolbox_** is a java application used to create paths and areas, and g
 
 >The **_SPSToolbox_** is based on the [SPS-Code-Generator](https://github.com/m34tcode/SPS-Code-Generator) created by _m34tcode_
 
+##The Interface
+![0](http://i.imgur.com/WCdxmtk.png)
+
+##Code Snippet (Path)
+![0](http://i.imgur.com/ArCzlmM.png)
+
+
 
 
 

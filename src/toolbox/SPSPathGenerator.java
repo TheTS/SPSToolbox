@@ -1,6 +1,7 @@
 package toolbox;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
@@ -20,11 +21,11 @@ class SPSPathGenerator extends JFrame implements ActionListener {
     private final HelpFrame helpFrame = new HelpFrame();
     private final CodeFrame codeFrame = new CodeFrame();
     private final SettingsFrame settingsFrame = new SettingsFrame();
-    private final JFileChooser dialog = new JFileChooser(settingsFrame.getLastLoadedFile());
     private final JPanel statusBar = new JPanel();
     private final JLabel MapCoordLabel = new JLabel();
     private final JLabel mouseLabel = new JLabel();
     private SidePane sidePane;
+    final JFileChooser dialog = new JFileChooser(settingsFrame.getLastLoadedFile());
 
     private SPSPathGenerator() throws HeadlessException {
         super("SPS Toolbox");
@@ -121,8 +122,11 @@ class SPSPathGenerator extends JFrame implements ActionListener {
             }
         };
 
+        dialog.setMultiSelectionEnabled(false);
+        FileFilter filter = new FileNameExtensionFilter("image files", "png");
+        dialog.setFileFilter(filter);
+
         mapView.loadMapImage(imageFile.getAbsolutePath());
-        dialog.setFileFilter(new FileNameExtensionFilter("Image Files", "png", "bmp", "jpg", "jpeg", "gif"));
 
         //Map menu
         JMenu menuMap = new JMenu("Map");
@@ -218,8 +222,7 @@ class SPSPathGenerator extends JFrame implements ActionListener {
                 mapView.reloadMapImage();
                 break;
             case "Load New Map":
-                dialog.setMultiSelectionEnabled(false);
-                dialog.showDialog(this, "Choose");
+                dialog.showDialog(this, "Choose new png image");
                 if (dialog.getSelectedFile() == null)
                     return;
                 imageFile = dialog.getSelectedFile();
