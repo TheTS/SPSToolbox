@@ -13,6 +13,7 @@ import java.util.Properties;
 
 class SettingsFrame extends JFrame implements ActionListener, ChangeListener, ItemListener {
 
+    private Point parentPoint;
     private final Properties properties = new Properties();
     private final File propertiesFile = new File(System.getProperty("user.home") + "/.SPSToolBox/", "SPSToolBox.properties");
     private final JButton bLineColor = new JButton("Choose Color");
@@ -40,10 +41,10 @@ class SettingsFrame extends JFrame implements ActionListener, ChangeListener, It
         });
 
         setPreferredSize(new Dimension(350, 250));
-        setLocationRelativeTo(null);
+
 
         //Game Mode
-        JLabel gameMode = new JLabel("RS Game Mode");
+        JLabel gameMode = new JLabel("Minimap Guide");
         JRadioButton bOSR = new JRadioButton("OSR");
         JRadioButton bRS3 = new JRadioButton("RS3");
         ButtonGroup bgGameMode = new ButtonGroup();
@@ -321,4 +322,8 @@ class SettingsFrame extends JFrame implements ActionListener, ChangeListener, It
         }
     }
 
+    public void setParentPoint(Point p) {
+        this.parentPoint = p;
+        this.setLocation(p.x + 5, p.y + 63);
+    }
 }

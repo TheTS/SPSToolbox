@@ -17,7 +17,7 @@ class SPSPathGenerator extends JFrame implements ActionListener {
     private static boolean IsPathActive = true;
     private static File imageFile;
     private final RSMapView mapView;
-    private final TipsFrame tipsFrame = new TipsFrame();
+    private final HelpFrame helpFrame = new HelpFrame();
     private final CodeFrame codeFrame = new CodeFrame();
     private final SettingsFrame settingsFrame = new SettingsFrame();
     private final JFileChooser dialog = new JFileChooser(settingsFrame.getLastLoadedFile());
@@ -145,7 +145,7 @@ class SPSPathGenerator extends JFrame implements ActionListener {
 
         //Help Menu
         JMenu menuHelp = new JMenu("Help");
-        menuHelp.add("How to use this").addActionListener(this);
+        menuHelp.add("Instructions").addActionListener(this);
 
         //Buttons
         JButton codeBtn = new JButton("Make Code Snippet");
@@ -211,6 +211,7 @@ class SPSPathGenerator extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        int min = (getIsPathActive() ? 2 : 3);
 
         switch (e.getActionCommand()) {
             case "Reload Map":
@@ -244,17 +245,25 @@ class SPSPathGenerator extends JFrame implements ActionListener {
                     sidePane.getPointTable().setPointArr(new Point[0]);
                 break;
             case "Settings":
+                settingsFrame.setParentPoint(this.getLocation());
                 settingsFrame.setVisible(true);
                 break;
-            case "How to use this":
-                tipsFrame.setVisible(true);
+            case "Instructions":
+                helpFrame.setVisible(true);
                 break;
             case "Make Code Snippet":
+                if (sidePane.getPoints().length < min){
+                    JOptionPane.showMessageDialog(this, String.valueOf(sidePane.getPoints().length) + " points is not enough to make " + (getIsPathActive() ? " a path." : " an area."), "Not enough points", JOptionPane.ERROR_MESSAGE);
+                    break;
+                }
                 codeFrame.setPath(getPathDec(), getIsPathActive(), imageFile.getName(), imageFile.getAbsolutePath());
                 codeFrame.setVisible(true);
                 break;
             case "Copy To Clipboard":
-                CopyPathToClip();
+                if (sidePane.getPoints().length < min){
+                    JOptionPane.showMessageDialog(this, String.valueOf(sidePane.getPoints().length) + " points is not enough to make " + (getIsPathActive() ? " a path." : " an area."), "Not enough points", JOptionPane.ERROR_MESSAGE);
+                    break;
+                }CopyPathToClip();
                 break;
             case "Path":
                 if (!getIsPathActive() && sidePane.getPoints().length > 0)

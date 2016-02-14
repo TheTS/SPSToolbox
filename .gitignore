@@ -7,3 +7,4 @@ out/production/SPSToolbox/META-INF/MANIFEST.MF
 *.jar
 .idea/artifacts/SPSToolbox.xml
 *.xml
+*.zip
