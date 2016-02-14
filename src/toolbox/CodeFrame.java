@@ -112,10 +112,10 @@ class CodeFrame extends JFrame implements ActionListener, MouseListener {
             append("  sps.setup(", Color.BLACK, false);
             append("'" + mapName + "'", Color.BLUE, false);
             append(", ", Color.BLACK, false);
-            append("'" + folder + "'", Color.BLUE, false);
+            append("" + folder + "", Color.BLACK, false);
             append(");\n", Color.BLACK, false);
             append("  walk();\n", Color.BLACK, false);
-            append("end.", Color.BLACK, true);
+            append("end.\n\n", Color.BLACK, true);
 
         } else {
 
@@ -143,10 +143,10 @@ class CodeFrame extends JFrame implements ActionListener, MouseListener {
             append("  sps.setup(", Color.BLACK, false);
             append("'" + mapName + "'", Color.BLUE, false);
             append(", ", Color.BLACK, false);
-            append("'" + folder + "'", Color.BLUE, false);
+            append("" + folder + "", Color.BLACK, false);
             append(");\n", Color.BLACK, false);
             append("  areaCheck();\n", Color.BLACK, false);
-            append("end.", Color.BLACK, true);
+            append("end.\n\n", Color.BLACK, true);
         }
     }
 
