@@ -8,7 +8,7 @@ The **_SPSToolbox_** is a java application used to create paths and areas, and g
 ![0](http://i.imgur.com/WCdxmtk.png)
 
 ##Code Snippet (Path)
-![0](http://i.imgur.com/ArCzlmM.png)
+![0](http://i.imgur.com/hSfkPbO.png)
 
 
 
